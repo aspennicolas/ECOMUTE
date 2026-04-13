@@ -13,3 +13,22 @@ pydantic-settings==2.7.1
 
 # Type hints support
 typing-extensions==4.12.2
+
+# Security
+python-multipart
+greenlet
+python-jose[cryptography]==3.5.0
+passlib[bcrypt]==1.7.4
+bcrypt==3.2.2
+
+# Testing
+pytest
+pytest-asyncio
+httpx
+
+# Data science and ML
+scikit-learn
+pandas
+joblib
+streamlit
+flet[all]

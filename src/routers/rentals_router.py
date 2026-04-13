@@ -1,46 +1,23 @@
-from fastapi import APIRouter, Depends, HTTPException
-from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select
+from fastapi import APIRouter, Depends
 
 from src.models.rentals import RentalOutcome, RentalProcessing
-from src.data.database import get_db
-from src.data.schema_models import Rental, Bike, User
+from src.data.datasources.rentals_data_source import RentalsDataSource, get_rentals_datasource
 
 router = APIRouter(prefix="/rentals", tags=["Rentals"])
 
 
+# POST /rentals  — start a new rental.
+# The client sends user_id and bike_id; we return confirmation + battery level.
 @router.post("/", response_model=RentalOutcome, status_code=201)
 async def create_rental(
-    payload: RentalProcessing,
-    db: AsyncSession = Depends(get_db),
+    payload: RentalProcessing,           # Pydantic validates the incoming JSON
+    datasource: RentalsDataSource = Depends(get_rentals_datasource), # FastAPI injects the datasource instance
 ) -> RentalOutcome:
-    # 1) Check bike exists
-    bike = await db.get(Bike, payload.bike_id)
-    if not bike:
-        raise HTTPException(status_code=404, detail="Bike not found")
-
-    # 2) Bike must be available
-    if bike.status != "available":
-        raise HTTPException(status_code=400, detail="Bike not available")
-
-    # 3) Check user exists
-    user = await db.get(User, payload.user_id)
-    if not user:
-        raise HTTPException(status_code=404, detail="User not found")
-
-    # 4) Create rental row
-    rental = Rental(user_id=payload.user_id, bike_id=payload.bike_id)
-
-    # 5) Update bike status
-    bike.status = "rented"
-
-    db.add(rental)
-    await db.commit()
-    await db.refresh(rental)
-
-    # Use battery from DB (source of truth)
-    return RentalOutcome(
+    # The datasource returns the saved Rental ORM object AND the bike's battery
+    # as a tuple so we can include it in the response without an extra query.
+    rental, bike_battery = await datasource.create_rental(payload.user_id, payload.bike_id)
+    return RentalOutcome( # We construct the response model using the data from the created rental and the bike battery.
         user_id=rental.user_id,
         bike_id=rental.bike_id,
-        bike_battery=bike.battery,
+        bike_battery=bike_battery,
     )

@@ -3,9 +3,23 @@ from src.data.datasources.users_data_source import (
     UsersDataSource,
     get_user_datasource,
 )
-from src.models.users import UserSignup
+from src.models.users import UserSignup, UserCreate, UserResponse
+from src.security import get_password_hash
+from src.logger import logger
 
 router = APIRouter(prefix="/users", tags=["Users"])
+
+
+@router.post("/", response_model=UserResponse)
+async def create_user(
+    user: UserCreate,
+    datasource: UsersDataSource = Depends(get_user_datasource),
+):
+    logger.info(f"Creating user: {user.username}")
+    return await datasource.create_user({
+        "username": user.username,
+        "hashed_password": get_password_hash(user.password),
+    })
 
 
 @router.get("/")
@@ -37,10 +51,17 @@ async def delete_user(
     user_id: int,
     datasource: UsersDataSource = Depends(get_user_datasource),
 ):
+    logger.warning(f"Deleting user: {user_id}")
     success = await datasource.delete_user(user_id)
     return {"success": success}
 
 
-@router.post("/signup-test")
-def signup_test(payload: UserSignup):
-    return {"ok": True, "email": str(payload.email)}
+@router.post("/signup-test", response_model=UserResponse)
+async def signup_test(
+    payload: UserSignup,
+    datasource: UsersDataSource = Depends(get_user_datasource),
+):
+    return await datasource.create_user({
+        "username": payload.username,
+        "hashed_password": get_password_hash(payload.password),
+    })

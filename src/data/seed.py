@@ -1,7 +1,8 @@
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
-from src.data.schema_models import Bike
-from src.data.schema_models import User 
+from src.data.models import Bike
+from src.data.models import User
+from src.security import get_password_hash 
 
 # Define your Mock Data here as dictionaries
 INITIAL_BIKES = [
@@ -11,25 +12,25 @@ INITIAL_BIKES = [
 ]
 
 INITIAL_USERS = [
-    {"username": "rider_one", "is_active": True},
-    {"username": "admin_dave", "is_active": True},
+    {"username": "rider_one", "hashed_password": get_password_hash("rider123"), "role": "rider", "is_active": True},
+    {"username": "admin_dave", "hashed_password": get_password_hash("admin123"), "role": "admin", "is_active": True},
 ]
 
 async def seed_data(db: AsyncSession):
     """
     Checks if the DB is empty. If yes, populates it with mock data.
     """
-    print("🌱 Checking if database needs seeding...")
+    print("Checking if database needs seeding...")
     
     # 1. Check if bikes exist
     result = await db.execute(select(Bike).limit(1))
     first_bike = result.scalar_one_or_none()
     
     if first_bike:
-        print("✅ Database already contains data. Skipping seed.")
+        print("Database already contains data. Skipping seed.")
         return
 
-    print("🚀 Seeding database with initial mock data...")
+    print("Seeding database with initial mock data...")
 
     # 2. Add Bikes
     for bike_data in INITIAL_BIKES:
@@ -44,4 +45,4 @@ async def seed_data(db: AsyncSession):
 
     # 4. Save to DB
     await db.commit()
-    print("🎉 Seeding complete!")
+    print("Seeding complete!")

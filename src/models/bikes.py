@@ -1,25 +1,17 @@
-'''Exercise 1: Pydantic schemas (20 Mins) 
-Task: Define the "Shape" of our data here. This ensures inputs are valid and 
-outputs are filtered (security). 
-    1. Define a class BikeBase. 
-    2. Use Type Hinting for all fields: model (str), battery_level (float), status 
-    (str - strictly 'available', 'rented', or 'maintenance') and optional 
-    station_id (int) 
-    3. Define also classes BikeCreate and BikeResponse (which includes id) 
-    4. Define classes UserCreate (username and email, both strings) and 
-    UserResponse (id - int , username - str , and is_active - bool) '''
-
 from typing import Literal, Optional
 from pydantic import BaseModel, Field
 
+# BikeBase holds the shared fields used for both creating and reading bikes.
 class BikeBase(BaseModel):
     model: str
-    battery: int = Field(le=100)
-    status: Literal["available", "rented", "maintenance"]
-    station_id: Optional[int] = None
+    battery: int = Field(le=100)  # must be <= 100 (percent)
+    status: Literal["available", "rented", "maintenance"]  # only these three values allowed
+    station_id: Optional[int] = None  # None means the bike is not docked at any station
 
+# BikeCreate is sent by the client when adding a new bike (no id yet).
 class BikeCreate(BikeBase):
     pass
 
+# BikeResponse is what the API sends back — includes the DB-generated id.
 class BikeResponse(BikeBase):
     id: int
