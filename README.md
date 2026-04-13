@@ -6,12 +6,12 @@ A REST API for managing an e-bike rental service, built with FastAPI and async S
 
 ## Tech Stack
 
-- **FastAPI** — web framework
-- **SQLAlchemy 2.x (async)** — ORM and database access
-- **SQLite + aiosqlite** — database
-- **JWT (python-jose)** — authentication
-- **passlib + bcrypt** — password hashing
-- **scikit-learn / joblib** — ML trip duration prediction
+- **FastAPI** - web framework
+- **SQLAlchemy 2.x (async)** - ORM and database access
+- **SQLite + aiosqlite** - database
+- **JWT (python-jose)** - authentication
+- **passlib + bcrypt** - password hashing
+- **scikit-learn / joblib** - ML trip duration prediction
 
 ---
 
@@ -51,85 +51,55 @@ Tokens expire after **30 minutes**.
 
 ### Auth
 
-**`POST /auth/token`**
-Login with username and password. Returns a JWT access token.
-
----
+| Method | Path | Description |
+|--------|------|-------------|
+| POST | `/auth/token` | Login and receive a JWT access token |
 
 ### Users
 
-**`POST /users/`**
-Create a new user.
-
-**`POST /users/signup-test`**
-Sign up with email validation and password rules (min 8 characters, alphanumeric only).
-
-**`GET /users/`**
-Get all users.
-
-**`GET /users/{user_id}`**
-Get a single user by ID.
-
-**`PUT /users/{user_id}`**
-Update a user.
-
-**`DELETE /users/{user_id}`**
-Delete a user.
-
----
+| Method | Path | Description |
+|--------|------|-------------|
+| POST | `/users/` | Create a new user |
+| POST | `/users/signup-test` | Sign up with email validation and password rules (min 8 chars, alphanumeric) |
+| GET | `/users/` | Get all users |
+| GET | `/users/{user_id}` | Get a single user by ID |
+| PUT | `/users/{user_id}` | Update a user |
+| DELETE | `/users/{user_id}` | Delete a user |
 
 ### Bikes
 
-**`GET /bikes/`**
-Get all bikes. Optionally filter by status:
-```
-GET /bikes/?status=available
-GET /bikes/?status=rented
-GET /bikes/?status=maintenance
-```
-
-**`GET /bikes/{bike_id}`**
-Get a single bike by ID.
-
-**`POST /bikes/`**
-Create a new bike.
-
-**`PUT /bikes/{bike_id}`**
-Update a bike.
-
-**`DELETE /bikes/{bike_id}`**
-Delete a bike.
-
----
+| Method | Path | Description |
+|--------|------|-------------|
+| GET | `/bikes/` | Get all bikes - optional filter: `?status=available\|rented\|maintenance` |
+| GET | `/bikes/{bike_id}` | Get a single bike by ID |
+| POST | `/bikes/` | Create a new bike |
+| PUT | `/bikes/{bike_id}` | Update a bike |
+| DELETE | `/bikes/{bike_id}` | Delete a bike |
 
 ### Stations
 
-**`GET /stations/`**
-Get all stations.
-
-**`POST /stations/`** _(Admin only)_
-Create a new station.
-
----
+| Method | Path | Auth | Description |
+|--------|------|------|-------------|
+| GET | `/stations/` | - | Get all stations |
+| POST | `/stations/` | Admin | Create a new station |
 
 ### Rentals
 
-**`POST /rentals/`**
-Create a rental. The bike's battery must be at least 20%.
-
----
+| Method | Path | Description |
+|--------|------|-------------|
+| POST | `/rentals/` | Create a rental - bike battery must be at least 20% |
 
 ### Admin
 
-**`GET /admin/stats`** _(Admin only)_
-Get admin stats.
-
----
+| Method | Path | Auth | Description |
+|--------|------|------|-------------|
+| GET | `/admin/stats` | Admin | Get admin stats |
 
 ### ML Prediction
 
-**`POST /predict/duration`**
-Predict the duration of a trip given distance and battery level.
+| Method | Path | Description |
+|--------|------|-------------|
+| POST | `/predict/duration` | Predict trip duration from distance and battery level |
 
 ---
 
